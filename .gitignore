@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Database & Lisensi (PENTING: Agar data pribadi/trial tidak terupload)
+data_ipl/
+*.db
+.app_license.json
+
+# Packaging (PyInstaller)
+build/
+dist/
+*.spec
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
