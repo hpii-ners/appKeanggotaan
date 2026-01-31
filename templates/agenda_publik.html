@@ -1,0 +1,59 @@
+{% extends "base_public.html" %}
+
+{% block content %}
+<div class="container py-4 animate__animated animate__fadeIn">
+    <div class="section-title mb-4">
+        <h3 class="fw-800 text-primary"><i class="bi bi-calendar3 me-2"></i>Agenda & Kegiatan</h3>
+        <p class="text-muted small">Jadwal kegiatan lingkungan yang akan datang</p>
+    </div>
+    
+    <div class="d-flex flex-column gap-3">
+        {% for item in data %}
+        <div class="card border-0 rounded-4 shadow-sm p-3 news-item mb-2" style="transition: transform 0.2s;">
+            <div class="d-flex align-items-center">
+                <div class="bg-primary text-white p-3 rounded-4 text-center me-4" style="min-width: 85px;">
+                    <h4 class="fw-bold mb-0">{{ item.tanggal_kegiatan.strftime('%d') }}</h4>
+                    <small class="text-uppercase fw-bold" style="font-size: 10px;">{{ item.tanggal_kegiatan.strftime('%b') }}</small>
+                </div>
+                
+                <div class="flex-grow-1">
+                    <h5 class="fw-bold mb-1 text-dark">{{ item.nama_kegiatan }}</h5>
+                    <div class="d-flex flex-wrap gap-3 mt-1">
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-clock me-1 text-primary"></i> {{ item.tanggal_kegiatan.strftime('%H:%M') }} WIB
+                        </p>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-geo-alt me-1 text-danger"></i> {{ item.lokasi if item.lokasi else 'Lokasi Belum Ditentukan' }}
+                        </p>
+                    </div>
+                    {% if item.keterangan %}
+                    <p class="mt-2 text-secondary small">{{ item.keterangan[:100] }}{{ '...' if item.keterangan|length > 100 }}</p>
+                    {% endif %}
+                </div>
+                
+                <div class="ms-auto d-none d-md-block">
+                    <i class="bi bi-chevron-right text-muted opacity-50"></i>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5 opacity-50">
+            <i class="bi bi-calendar-x display-4 mb-3 d-block"></i>
+            <h5 class="fw-bold">Belum Ada Agenda</h5>
+            <p>Silakan periksa kembali nanti untuk pembaruan jadwal kegiatan warga.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+    .fw-800 { font-weight: 800; }
+    .news-item:hover {
+        transform: scale(1.01);
+        border-left: 5px solid var(--electric-blue) !important;
+    }
+    .section-title h3 {
+        letter-spacing: -1px;
+    }
+</style>
+{% endblock %}

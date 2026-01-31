@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ identitas.nama_app if identitas else 'Aurora Ledger' }} | System Anggota</title>
+    
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='iplrw20.png') }}" type="image/png">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --electric-blue: #0284c7;
+            --neon-purple: #9333ea;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 85px;
+            --slate-dark: #0f172a;
+            --slate-muted: #64748b;
+            --bg-light: #f8fafc;
+            --z-sidebar: 1030;
+            --z-mobile-toggle: 1040;
+            --z-sidebar-backdrop: 1025;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-light);
+            color: var(--slate-dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background var(--transition-speed);
+        }
+
+        /* === SIDEBAR STYLE === */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: var(--z-sidebar);
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: width var(--transition-speed) ease, transform var(--transition-speed) ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+        body.sidebar-collapsed .sidebar {
+            width: var(--sidebar-collapsed-width);
+            padding: 1.5rem 0.75rem;
+        }
+
+        /* Logic Menyembunyikan Teks saat Collapsed */
+        body.sidebar-collapsed .sidebar-brand span,
+        body.sidebar-collapsed .nav-link span,
+        body.sidebar-collapsed .nav-link small,
+        body.sidebar-collapsed .sidebar small.section-title,
+        body.sidebar-collapsed .mt-auto .license-info-text,
+        body.sidebar-collapsed .mt-auto .btn-activate-sidebar {
+            display: none !important;
+        }
+
+        body.sidebar-collapsed .sidebar-brand, 
+        body.sidebar-collapsed .nav-link {
+            justify-content: center;
+        }
+
+        body.sidebar-collapsed .brand-icon {
+            margin-right: 0;
+        }
+
+        body.sidebar-collapsed .nav-link i {
+            margin-right: 0;
+            font-size: 1.5rem;
+        }
+
+        /* Backdrop/Overlay Mobile */
+        .sidebar-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: var(--z-sidebar-backdrop);
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-speed) ease-in-out;
+        }
+
+        .sidebar-brand {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--slate-dark);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            white-space: nowrap;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: linear-gradient(135deg, var(--electric-blue), var(--neon-purple));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-right: 0.75rem;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+            transition: margin var(--transition-speed);
+        }
+
+        .nav-pills .nav-link {
+            color: var(--slate-muted);
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .nav-pills .nav-link i {
+            font-size: 1.2rem;
+            margin-right: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .nav-pills .nav-link:hover {
+            background-color: #f1f5f9;
+            color: var(--electric-blue);
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--electric-blue), #0369a1);
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+
+        .nav-pills .nav-link.active i { color: #ffffff !important; }
+
+        /* === MAIN CONTENT STYLE === */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left var(--transition-speed) ease;
+        }
+
+        body.sidebar-collapsed .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* === TOGGLE BUTTONS === */
+        .menu-toggle, .desktop-toggle {
+            position: fixed;
+            z-index: var(--z-mobile-toggle);
+            padding: 0.5rem 0.7rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            color: var(--slate-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-toggle { top: 1rem; left: 1rem; display: none; }
+        
+        .desktop-toggle { 
+            top: 1.25rem; 
+            left: calc(var(--sidebar-width) - 18px); 
+            transition: left var(--transition-speed) ease;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+        }
+
+        body.sidebar-collapsed .desktop-toggle {
+            left: calc(var(--sidebar-collapsed-width) - 18px);
+        }
+
+        /* === LICENSE CARD STYLES === */
+        .bg-license-trial {
+            background: linear-gradient(135deg, #fff7ed, #ffedd5);
+        }
+        .bg-license-full {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+        }
+        .license-card-transition {
+            transition: all 0.3s;
+        }
+
+        /* === RESPONSIVE RULES === */
+        @media (max-width: 991.98px) {
+            .sidebar { 
+                transform: translateX(-100%); 
+                width: var(--sidebar-width) !important; 
+            }
+            .sidebar.show { transform: translateX(0); }
+            .sidebar.show ~ .sidebar-backdrop { opacity: 1; visibility: visible; }
+            .main-content { margin-left: 0 !important; padding-top: 5rem; }
+            .menu-toggle { display: flex; }
+            .desktop-toggle { display: none; }
+        }
+
+        .card { 
+            background: #ffffff !important; 
+            border: 1px solid #e2e8f0 !important; 
+            border-radius: 20px; 
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important; 
+        }
+
+        footer { 
+            margin-top: auto; 
+            padding-top: 2rem; 
+            border-top: 1px solid #e2e8f0; 
+            color: var(--slate-muted); 
+            font-size: 0.85rem; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <button class="menu-toggle btn" id="sidebarToggle" aria-label="Buka Menu">
+        <i class="bi bi-list fs-4"></i>
+    </button>
+
+    <button class="desktop-toggle btn d-none d-lg-flex" id="desktopToggle" aria-label="Toggle Sidebar">
+        <i class="bi bi-chevron-left" id="toggleIcon"></i>
+    </button>
+
+    <nav class="sidebar" id="sidebar">
+        <a href="/" class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-grid-fill"></i>
+            </div>
+            <span class="text-truncate">{{ identitas.nama_app if identitas else 'AURORA LEDGER' }}</span>
+        </a>
+
+        <div class="nav flex-column nav-pills">
+            {% set active_page = request.path %}
+
+            <small class="text-uppercase text-muted fw-bold mb-2 px-3 mt-2 section-title" style="font-size: 0.7rem; letter-spacing: 1.5px;">Master Data</small>
+            <a href="/warga" class="nav-link {{ 'active' if active_page.startswith('/warga') }}">
+                <i class="bi bi-people"></i> <span>Data {{ identitas.label_anggota }}</span>
+            </a>
+
+            <small class="text-uppercase text-muted fw-bold mb-2 px-3 mt-4 section-title" style="font-size: 0.7rem; letter-spacing: 1.5px;">Informasi</small>
+            <a class="nav-link {{ 'active' if active_page.startswith('/admin/berita') }}" href="{{ url_for('berita.list_admin') }}">
+                <i class="bi bi-pencil-square"></i> <span>Kelola Berita</span>
+            </a>
+            <a class="nav-link {{ 'active' if active_page.startswith('/admin/agenda') }}" href="{{ url_for('agenda.list_admin') }}">
+                <i class="bi bi-pencil-square"></i> <span>Kelola Agenda</span>
+            </a>
+            
+            <small class="text-uppercase text-muted fw-bold mb-2 px-3 mt-4 section-title" style="font-size: 0.7rem; letter-spacing: 1.5px;">Keuangan</small>
+            <a class="nav-link {{ 'active' if active_page == '/' or active_page == '/bayar' }}" href="/">
+                <i class="bi bi-wallet2"></i> <span>Pemasukan (Iuran)</span>
+            </a>
+            <a class="nav-link {{ 'active' if active_page.startswith('/pengeluaran') }}" href="/pengeluaran">
+                <i class="bi bi-cart-dash"></i> <span>Pengeluaran Kas</span>
+            </a>
+            
+            <small class="text-uppercase text-muted fw-bold mb-2 px-3 mt-4 section-title" style="font-size: 0.7rem; letter-spacing: 1.5px;">Laporan</small>
+            <a class="nav-link {{ 'active' if active_page == '/laporan' }}" href="/laporan">
+                <i class="bi bi-journal-bookmark-fill"></i> <span>Buku Kas Laporan</span>
+            </a>
+            <a class="nav-link {{ 'active' if active_page == '/laporan/tunggakan' }}" href="/laporan/tunggakan">
+                <i class="bi bi-person-exclamation"></i> <span>Kontrol Tunggakan</span>
+            </a>
+
+            <hr class="my-4 text-muted opacity-25">
+            <small class="text-uppercase text-muted fw-bold mb-2 px-3 section-title" style="font-size: 0.7rem; letter-spacing: 1.5px;">Konfigurasi</small>
+            <a class="nav-link {{ 'active' if active_page.startswith('/identitas') }}" href="/identitas">
+                <i class="bi bi-sliders"></i> <span>Identitas Aplikasi</span>
+            </a>
+            
+            <a class="nav-link {{ 'active' if 'users' in request.path }}" href="{{ url_for('admin.user_admin') }}">
+                <div class="icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                    <i class="bi bi-people-fill {{ 'text-primary' if 'users' in request.path else 'text-dark' }}"></i>
+                </div>
+                <span class="nav-link-text ms-1">Kelola User</span>
+            </a>
+
+            <a class="nav-link text-danger mt-3" href="{{ url_for('auth.logout') }}">
+                <i class="bi bi-box-arrow-right"></i> <span>Keluar</span>
+            </a>
+        </div>
+
+        <div class="mt-auto pt-4">
+            <div class="p-3 rounded-4 border d-flex flex-column position-relative overflow-hidden license-card-transition {{ 'bg-license-trial' if is_trial else 'bg-license-full' }}">
+                
+                <div class="d-flex align-items-center mb-0">
+                    <div class="p-2 rounded-circle bg-white shadow-sm me-3 d-flex align-items-center justify-content-center" style="width: 35px; height: 35px; min-width: 35px;">
+                        <i class="bi {{ 'bi-exclamation-triangle-fill text-warning' if is_trial else 'bi-patch-check-fill text-success' }} fs-5"></i>
+                    </div>
+                    
+                    <div class="license-info-text overflow-hidden">
+                        <small class="d-block fw-bold text-muted" style="font-size: 0.6rem; letter-spacing: 0.5px;">STATUS LISENSI</small>
+                        <span class="fw-800 {{ 'text-warning' if is_trial else 'text-success' }}" style="font-size: 0.85rem;">
+                            {{ 'TRIAL VERSION' if is_trial else 'FULL VERSION' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="license-info-text mt-3">
+                    {% if is_trial %}
+                        <div class="d-flex justify-content-between align-items-end mb-1">
+                            <span class="fw-bold text-dark" style="font-size: 1.5rem; line-height: 1;">{{ license_days }}</span>
+                            <small class="text-muted fw-bold mb-1" style="font-size: 0.7rem;">Hari Lagi</small>
+                        </div>
+                        
+                        {% set p_val = (license_days / 30) * 100 %}
+                        <div class="progress bg-white shadow-sm" style="height: 6px;" role="progressbar" aria-label="Sisa masa trial" aria-valuenow="{{ license_days }}" aria-valuemin="0" aria-valuemax="30">
+                            <div class="progress-bar bg-warning" style="width: {{ p_val }}%"></div>
+                        </div>
+
+                        <button type="button" class="btn btn-sm btn-white w-100 mt-2 fw-bold text-warning shadow-sm btn-activate-sidebar" data-bs-toggle="modal" data-bs-target="#modalAktivasiSidebar">
+                            <i class="bi bi-key-fill me-1"></i> Aktivasi
+                        </button>
+                    {% else %}
+                        <p class="mb-0 text-success small fw-medium" style="font-size: 0.75rem; line-height: 1.3;">
+                            Aplikasi teraktivasi penuh.<br>Terima kasih.
+                        </p>
+                    {% endif %}
+                    
+                    <small class="d-block mt-2 text-muted opacity-50 text-truncate" style="font-size: 0.6rem;">
+                        ID: {{ machine_id[:12] }}...
+                    </small>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="main-content">
+        <div class="animate__animated animate__fadeIn">
+            {% block content %}{% endblock %}
+        </div>
+
+        <footer class="text-center mt-5">
+            <div class="container-fluid">
+                <p class="mb-1 fw-bold">
+                    <i class="bi bi-shield-check me-2 text-primary"></i>
+                    {{ identitas.nama_app if identitas else 'AURORA LEDGER' }}
+                    {% if identitas and identitas.kota %} &bull; {{ identitas.kota }}{% endif %}
+                </p>
+                <p class="small mb-0 text-muted">
+                    &copy; 2026 Aurora Framework &bull; Sistem Manajemen Warga Modern
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <div class="modal fade" id="modalAktivasiSidebar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 p-4 bg-danger text-white rounded-top-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-shield-lock-fill me-2"></i>Aktivasi Lisensi</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-2">Salin <b>Machine ID</b> ini dan kirimkan ke Admin untuk mendapatkan Serial Number:</p>
+                    
+                    <button type="button" class="btn p-3 bg-light border w-100 text-center mb-3" onclick="navigator.clipboard.writeText('{{ machine_id }}'); alert('ID berhasil disalin!');" title="Klik untuk menyalin">
+                        <code class="fs-6 text-dark fw-bold d-block">{{ machine_id }}</code>
+                        <div class="small text-primary mt-1 fw-bold"><i class="bi bi-clipboard"></i> Klik untuk menyalin</div>
+                    </button>
+
+                    <form action="/activate-license-system" method="POST">
+                        <div class="mb-3">
+                            <label for="serialNumberInput" class="form-label fw-bold small">Masukkan Serial Number</label>
+                            <input type="text" id="serialNumberInput" name="serial_number" class="form-control text-center fw-bold form-control-lg" placeholder="XXXX-XXXX-XXXX-XXXX" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100 rounded-pill fw-bold">AKTIFKAN SEKARANG</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const desktopToggle = document.getElementById('desktopToggle');
+            const toggleIcon = document.getElementById('toggleIcon');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+            const body = document.body;
+
+            function closeSidebar() {
+                sidebar.classList.remove('show');
+            }
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('show');
+                });
+            }
+
+            if (sidebarBackdrop) {
+                sidebarBackdrop.addEventListener('click', closeSidebar);
+            }
+
+            if (desktopToggle) {
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                if (isCollapsed) {
+                    body.classList.add('sidebar-collapsed');
+                    if (toggleIcon) toggleIcon.classList.replace('bi-chevron-left', 'bi-chevron-right');
+                }
+
+                desktopToggle.addEventListener('click', function() {
+                    body.classList.toggle('sidebar-collapsed');
+                    const isNowCollapsed = body.classList.contains('sidebar-collapsed');
+                    localStorage.setItem('sidebarCollapsed', isNowCollapsed);
+                    if (isNowCollapsed) {
+                        toggleIcon.classList.replace('bi-chevron-left', 'bi-chevron-right');
+                    } else {
+                        toggleIcon.classList.replace('bi-chevron-right', 'bi-chevron-left');
+                    }
+                });
+            }
+        });
+    </script>
+
+    {% block modals %}{% endblock %}
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

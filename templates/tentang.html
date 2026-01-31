@@ -1,0 +1,55 @@
+{% extends "base_public.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="text-center mb-5 animate__animated animate__fadeInDown">
+                <h1 class="fw-800 text-primary">{{ identitas.nama_app }}</h1>
+                <p class="lead text-muted">{{ identitas.kota }}</p>
+                <hr class="mx-auto" style="width: 100px; border: 2px solid var(--electric-blue);">
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-6 animate__animated animate__fadeInLeft">
+                    <div class="card h-100 border-0 shadow-sm p-4" style="border-radius: 20px;">
+                        <h4 class="fw-bold text-primary mb-3"><i class="bi bi-eye me-2"></i>Visi</h4>
+                        <p>{{ identitas.visi if identitas.visi else 'Visi belum diatur.' }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6 animate__animated animate__fadeInRight">
+                    <div class="card h-100 border-0 shadow-sm p-4" style="border-radius: 20px;">
+                        <h4 class="fw-bold text-primary mb-3"><i class="bi bi-bullseye me-2"></i>Misi</h4>
+                        <p>{{ identitas.misi if identitas.misi else 'Misi belum diatur.' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm p-4 mb-5 animate__animated animate__fadeInUp" style="border-radius: 20px;">
+                <h4 class="fw-bold text-primary mb-3"><i class="bi bi-info-circle me-2"></i>Tentang Kami</h4>
+                <div class="text-muted" style="line-height: 1.8;">
+                    {{ identitas.sejarah if identitas.sejarah else 'Informasi sejarah belum diisi.' }}
+                </div>
+            </div>
+
+            <div class="text-center mb-4">
+                <h4 class="fw-bold text-primary">Struktur Organisasi</h4>
+            </div>
+            <div class="row text-center g-4">
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-4 border">
+                        <small class="text-muted d-block">Ketua</small>
+                        <span class="fw-bold fs-5">{{ identitas.ketua }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 bg-light rounded-4 border">
+                        <small class="text-muted d-block">Sekretaris</small>
+                        <span class="fw-bold fs-5">{{ identitas.sekretaris }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

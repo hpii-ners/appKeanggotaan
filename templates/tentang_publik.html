@@ -1,0 +1,138 @@
+{% extends "base_public.html" %}
+
+{% block content %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: 30px;
+        padding: 60px 20px;
+        margin-bottom: 40px;
+        border: 1px solid #e2e8f0;
+    }
+    .card-vision {
+        border: none;
+        border-radius: 24px;
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+    .card-vision:hover {
+        transform: translateY(-10px);
+    }
+    .icon-box {
+        width: 60px;
+        height: 60px;
+        background: rgba(2, 132, 199, 0.1);
+        color: #0284c7;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+    .text-justify {
+        text-align: justify;
+    }
+    .structure-card {
+        background: #ffffff;
+        border-radius: 20px;
+        border: 1px solid #f1f5f9;
+        padding: 25px;
+        transition: all 0.3s ease;
+    }
+    .structure-card:hover {
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<div class="container py-5">
+    <div class="profile-header text-center animate__animated animate__fadeIn">
+        <div class="mb-4">
+            <i class="bi bi-building-fill text-primary" style="font-size: 4rem;"></i>
+        </div>
+        <h1 class="fw-800 text-dark mb-2" style="letter-spacing: -2px;">{{ identitas.nama_app if identitas else 'Aurora Ledger' }}</h1>
+        <p class="text-muted fw-bold text-uppercase mb-0" style="letter-spacing: 2px;">{{ identitas.kota if identitas else 'Kota' }}</p>
+        <div class="mt-4 d-flex justify-content-center gap-3">
+            <span class="badge bg-white text-primary border px-3 py-2 rounded-pill shadow-sm">
+                <i class="bi bi-geo-alt-fill me-1"></i> {{ identitas.alamat if identitas else 'Alamat Organisasi' }}
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 animate__animated animate__fadeInLeft">
+            <div class="card card-vision shadow-sm p-4">
+                <div class="icon-box">
+                    <i class="bi bi-eye-fill"></i>
+                </div>
+                <h3 class="fw-bold text-dark">Visi Kami</h3>
+                <p class="text-secondary mb-0" style="line-height: 1.7;">
+                    {{ identitas.visi if identitas and identitas.visi else 'Menjadi organisasi yang transparan, akuntabel, dan mengutamakan kesejahteraan serta keharmonisan seluruh anggota melalui integrasi teknologi informasi.' }}
+                </p>
+            </div>
+        </div>
+        <div class="col-md-6 animate__animated animate__fadeInRight">
+            <div class="card card-vision shadow-sm p-4">
+                <div class="icon-box">
+                    <i class="bi bi-bullseye"></i>
+                </div>
+                <h3 class="fw-bold text-dark">Misi Kami</h3>
+                <div class="text-secondary mb-0" style="line-height: 1.7;">
+                    {{ identitas.misi if identitas and identitas.misi else 'Memberikan pelayanan administrasi yang cepat, mengelola keuangan secara terbuka, dan mempererat tali silaturahmi antar warga.' }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-5 mb-5 animate__animated animate__fadeInUp" style="border-radius: 30px;">
+        <div class="row align-items-center">
+            <div class="col-lg-12">
+                <h3 class="fw-800 text-dark mb-4">Mengenal Lebih Dekat</h3>
+                <div class="text-secondary text-justify" style="line-height: 2; font-size: 1.1rem;">
+                    {% if identitas and identitas.sejarah %}
+                        {{ identitas.sejarah | safe }}
+                    {% else %}
+                        <p>Selamat datang di portal resmi <strong>{{ identitas.nama_app if identitas else 'Aurora Ledger' }}</strong>. Kami adalah organisasi yang berdedikasi untuk menciptakan lingkungan yang teratur dan modern. Melalui sistem Aurora Ledger, kami berkomitmen untuk mendigitalisasi setiap proses administrasi agar setiap warga/anggota mendapatkan kemudahan dalam akses informasi dan transparansi keuangan.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mb-5">
+        <h3 class="fw-800 text-dark mb-2">Struktur Kepengurusan</h3>
+        <p class="text-muted">Amanah dan dedikasi untuk pelayanan anggota</p>
+    </div>
+
+    <div class="row g-4 justify-content-center animate__animated animate__fadeInUp">
+        <div class="col-md-4">
+            <div class="structure-card text-center">
+                <div class="mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="bi bi-person-badge fs-2"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-1">{{ identitas.ketua if identitas else 'Nama Ketua' }}</h5>
+                <p class="text-primary small fw-bold text-uppercase mb-0">Ketua Organisasi</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="structure-card text-center">
+                <div class="mb-3">
+                    <div class="bg-dark text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                        <i class="bi bi-pen-fill fs-3"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-1">{{ identitas.sekretaris if identitas else 'Nama Sekretaris' }}</h5>
+                <p class="text-dark small fw-bold text-uppercase mb-0">Sekretaris</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="https://wa.me/{{ identitas.no_hp }}" class="btn btn-primary btn-lg px-5 py-3 fw-bold rounded-pill shadow">
+            <i class="bi bi-chat-dots me-2"></i> Hubungi Kami via WhatsApp
+        </a>
+    </div>
+</div>
+{% endblock %}

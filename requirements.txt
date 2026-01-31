@@ -1,0 +1,11 @@
+Flask==3.1.2
+Flask-Login==0.6.3
+Flask-SQLAlchemy==3.1.1
+SQLAlchemy==2.0.46
+Werkzeug==3.1.5
+pandas==3.0.0
+python-dotenv==1.2.1
+openpyxl==3.1.5
+pillow==12.1.0
+pyinstaller==6.18.0
+waitress==3.0.0

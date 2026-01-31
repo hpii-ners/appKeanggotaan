@@ -1,0 +1,27 @@
+{% extends "base_public.html" %}
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <div class="section-title">Tentang Kami</div>
+    <div class="card border-0 rounded-4 shadow-sm p-4 p-lg-5 bg-white mb-4">
+        <h2 class="fw-800 mb-4">{{ identitas.nama_app }}</h2>
+        <div class="fs-5 text-muted leading-relaxed mb-5">
+            {{ identitas.keterangan | safe }}
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="p-3 rounded-4 bg-light border-start border-primary border-4">
+                    <small class="text-uppercase fw-bold text-primary" style="font-size: 10px; letter-spacing: 1px;">Ketua Lingkungan</small>
+                    <h5 class="fw-bold mb-0 mt-1">{{ identitas.ketua }}</h5>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="p-3 rounded-4 bg-light border-start border-purple border-4" style="border-left-color: var(--neon-purple) !important;">
+                    <small class="text-uppercase fw-bold text-purple" style="font-size: 10px; letter-spacing: 1px; color: var(--neon-purple);">Sekretaris</small>
+                    <h5 class="fw-bold mb-0 mt-1">{{ identitas.sekretaris }}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

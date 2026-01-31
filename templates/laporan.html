@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <div class="card border-0 shadow-sm p-4 mb-4 no-print" 
+         style="background: rgba(255, 255, 255, 0.8) !important; backdrop-filter: blur(20px); border: 1px solid rgba(2, 132, 199, 0.2) !important;">
+        <h4 class="mb-3 text-primary fw-bold"><i class="bi bi-filter-right me-2"></i>Filter Periode Laporan</h4>
+        <form action="/laporan" method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="start" class="form-label">Dari Tanggal</label>
+                <input type="date" id="start" name="start" class="form-control" 
+                       value="{{ request.args.get('start', '') }}" 
+                       style="background: #ffffff !important; color: #000000 !important; border: 2px solid #0284c7; font-weight: 700;">
+            </div>
+            <div class="col-md-4">
+                <label for="end" class="form-label">Sampai Tanggal</label>
+                <input type="date" id="end" name="end" class="form-control" 
+                       value="{{ request.args.get('end', '') }}" 
+                       style="background: #ffffff !important; color: #000000 !important; border: 2px solid #0284c7; font-weight: 700;">
+            </div>
+            <div class="col-md-4 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary w-100 fw-bold shadow">PROSES DATA</button>
+                <button type="button" onclick="window.print()" class="btn btn-dark w-100 fw-bold shadow">
+                    <i class="bi bi-printer me-2"></i>PRINT A4
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="print-only d-none d-print-block">
+        <div class="d-flex align-items-center justify-content-center mb-4">
+            <img src="{{ url_for('static', filename='iplrw20.png') }}" alt="Logo" style="height: 100px; margin-right: 25px;">
+            <div class="text-center">
+                <h2 class="mb-0 fw-bold" style="letter-spacing: 2px; line-height: 1.2; color: #000;">LAPORAN KEUANGAN KAS</h2>
+                <h4 class="mb-1 text-uppercase fw-bold" style="line-height: 1.2; color: #000;">
+                    {{ identitas.nama_app if identitas else 'ORGANISASI WARGA' }}
+                    {% if identitas and identitas.kota %} - {{ identitas.kota }}{% endif %}
+                </h4>
+                <p class="mb-0 small fw-bold text-dark">Periode: {{ request.args.get('start', 'Awal') }} s/d {{ request.args.get('end', 'Sekarang') }}</p>
+            </div>
+        </div>
+        <div style="border-bottom: 5px double #000; margin-bottom: 25px;"></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm p-3 text-center bg-white border-start border-4 border-secondary">
+                <small class="text-uppercase fw-bold text-muted" style="font-size: 0.65rem;">Saldo Awal</small>
+                <h5 class="mb-0 text-dark fw-bold">Rp {{ "{:,.0f}".format(saldo_awal) }}</h5>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm p-3 text-center bg-white border-start border-4 border-success">
+                <small class="text-uppercase fw-bold text-success" style="font-size: 0.65rem;">Total Masuk (+)</small>
+                <h5 class="mb-0 text-success fw-bold">Rp {{ "{:,.0f}".format(masuk) }}</h5>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm p-3 text-center bg-white border-start border-4 border-danger">
+                <small class="text-uppercase fw-bold text-danger" style="font-size: 0.65rem;">Total Keluar (-)</small>
+                <h5 class="mb-0 text-danger fw-bold">Rp {{ "{:,.0f}".format(keluar) }}</h5>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card border-0 shadow-sm p-3 text-center bg-primary text-white border-start border-4 border-info">
+                <small class="text-uppercase fw-bold text-white-50" style="font-size: 0.65rem;">Saldo Akhir</small>
+                <h5 class="mb-0 fw-bold text-black">Rp {{ "{:,.0f}".format(saldo_akhir) }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0" style="color: #000000; font-weight: 500;">
+                <thead class="text-center bg-light">
+                    <tr class="text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px; background-color: #f1f5f9;">
+                        <th style="width: 12%;">Tanggal</th>
+                        <th>Keterangan / Deskripsi</th>
+                        <th style="width: 15%;">Masuk (Db)</th>
+                        <th style="width: 15%;">Keluar (Kr)</th>
+                        <th style="width: 18%; background: #e2e8f0;">Saldo Akhir</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="fw-bold" style="background: #f8fafc;">
+                        <td class="text-center">-</td>
+                        <td class="px-3">Saldo awal / Pindahan bulan sebelumnya</td>
+                        <td class="text-end px-3">-</td>
+                        <td class="text-end px-3">-</td>
+                        <td class="text-end px-3 bg-light">Rp {{ "{:,.0f}".format(saldo_awal) }}</td>
+                    </tr>
+
+                    {% for t in transaksi %}
+                    <tr>
+                        <td class="text-center small fw-bold text-muted">{{ t.tanggal.strftime('%d/%m/%Y') }}</td>
+                        <td class="px-3">{{ t.keterangan }}</td>
+                        <td class="text-end px-3 text-success">
+                            {% if t.masuk > 0 %} + {{ "{:,.0f}".format(t.masuk) }} {% else %} - {% endif %}
+                        </td>
+                        <td class="text-end px-3 text-danger">
+                            {% if t.keluar > 0 %} - {{ "{:,.0f}".format(t.keluar) }} {% else %} - {% endif %}
+                        </td>
+                        <td class="text-end px-3 fw-bold" style="background: #f8fafc;">
+                            Rp {{ "{:,.0f}".format(t.saldo_akhir) }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted small">
+                            <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                            Tidak ada data untuk periode ini.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-none d-print-block mt-5">
+        <div class="row">
+            <div class="col-12 text-end mb-4 fw-bold text-dark">
+                {{ identitas.kota if identitas and identitas.kota else 'Tangerang' }}, {{ datetime.now().strftime('%d %B %Y') }}
+            </div>
+            <div class="col-6 text-center text-dark">
+                <p class="mb-5 fw-bold">Mengetahui,<br>Ketua</p>
+                <br>
+                <p class="mt-4 fw-bold" style="text-decoration: underline;">
+                    {{ identitas.ketua if identitas and identitas.ketua else 'Ns. Hendi, S.Kep. MMSI' }}
+                </p>
+            </div>
+            <div class="col-6 text-center text-dark">
+                <p class="mb-5 fw-bold">Dibuat oleh,<br>Bendahara / Sekretaris</p>
+                <br>
+                <p class="mt-4 fw-bold" style="text-decoration: underline;">
+                    {{ identitas.sekretaris if identitas and identitas.sekretaris else 'Ns. Hendi, S.Kep. MMSI' }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* FIX: Standard properties for linter compatibility */
+    @media print {
+        .no-print, nav, .sidebar, .menu-toggle, footer, .sidebar-backdrop {
+            display: none !important;
+        }
+
+        @page { size: A4; margin: 1.5cm; }
+
+        body {
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-family: 'Times New Roman', serif;
+            padding: 0 !important;
+        }
+
+        .main-content { margin-left: 0 !important; padding: 0 !important; }
+        .container-fluid { width: 100% !important; max-width: 100% !important; }
+        
+        /* CSS VENDOR PREFIX FIX */
+        .table thead th { 
+            background-color: #f2f2f2 !important; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+        }
+        
+        .bg-light, .bg-primary { 
+            background-color: #f8f8f8 !important; 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important;
+        }
+
+        .table td, .table th { 
+            border: 1px solid #000 !important; 
+            color: #000 !important; 
+        }
+
+        /* Memastikan logo muncul saat print */
+        img { 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+        }
+    }
+</style>
+{% endblock %}

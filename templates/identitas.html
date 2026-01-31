@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .high-contrast {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 2px solid #0284c7;
+        font-weight: 700;
+    }
+    .high-contrast:focus {
+         box-shadow: 0 0 0 0.25rem rgba(2, 132, 199, 0.25) !important;
+    }
+    .section-divider {
+        border-top: 2px dashed #e9ecef;
+        margin: 20px 0;
+        position: relative;
+    }
+    .section-title {
+        background: #fff;
+        padding: 0 10px;
+        position: absolute;
+        top: -12px;
+        left: 20px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="row animate__animated animate__fadeIn">
+    <div class="col-md-12 mb-4 d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-success px-4 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalTambahIdentitas">
+            <i class="bi bi-building-add me-2"></i>Tambah Identitas
+        </button>
+        <div class="text-end">
+            <h4 class="fw-bold text-success mb-0">PENGATURAN IDENTITAS</h4>
+            <small class="text-muted">Data KOP Surat & Info Aplikasi</small>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 p-4 text-dark">
+            <div class="table-responsive">
+                <table class="table table-hover w-100 align-middle">
+                    <thead class="text-secondary table-light">
+                        <tr>
+                            <th>NAMA APLIKASI / ORGANISASI</th>
+                            <th>ALAMAT & KOTA</th>
+                            <th>KONTAK & PENGURUS</th>
+                            <th>LABEL SEBUTAN</th>
+                            <th class="text-center" style="width: 150px;">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in data %}
+                        <tr>
+                            <td class="fw-bold text-success">{{ d.nama_app }}</td>
+                            <td>
+                                {{ d.alamat }}<br>
+                                <small class="text-muted fw-bold">{{ d.kota }}</small>
+                            </td>
+                            <td>
+                                <small><i class="bi bi-phone me-1"></i>{{ d.no_hp }}</small><br>
+                                <small>Ketua: {{ d.ketua }}</small><br>
+                                <small>Sekr: {{ d.sekretaris }}</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ d.label_anggota }}</span>
+                                <span class="badge bg-light text-dark border">{{ d.label_iuran }}</span>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-sm btn-outline-primary border-0 btn-edit-identitas" 
+                                        data-id="{{ d.id }}"
+                                        data-nama="{{ d.nama_app }}"
+                                        data-alamat="{{ d.alamat }}"
+                                        data-kota="{{ d.kota }}"
+                                        data-hp="{{ d.no_hp }}"
+                                        data-ketua="{{ d.ketua }}"
+                                        data-sekretaris="{{ d.sekretaris }}"
+                                        data-ket="{{ d.keterangan }}"
+                                        data-l_anggota="{{ d.label_anggota }}"
+                                        data-l_iuran="{{ d.label_iuran }}"
+                                        data-l_t1="{{ d.label_tingkat1 }}"
+                                        data-l_t2="{{ d.label_tingkat2 }}"
+                                        data-l_t3="{{ d.label_tingkat3 }}">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <a href="/identitas/hapus/{{ d.id }}" class="btn btn-sm btn-outline-danger border-0" 
+                                   onclick="return confirm('PERINGATAN: Menghapus identitas ini mungkin mempengaruhi tampilan KOP surat. Lanjutkan?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Belum ada data identitas tambahan.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade text-dark" id="modalEditIdentitas" tabindex="-1" aria-labelledby="modalEditTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; background: #ffffff;">
+            <div class="modal-header border-0 pb-0 px-4 pt-4">
+                <h5 class="modal-title fw-bold text-primary" id="modalEditTitle">Edit Data Identitas & Label</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEditIdentitas" method="POST">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edit_nama_app" class="form-label small fw-bold">Nama Aplikasi / Organisasi</label>
+                            <input type="text" id="edit_nama_app" name="nama_app" class="form-control high-contrast" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_kota" class="form-label small fw-bold">Kota / Kabupaten</label>
+                            <input type="text" id="edit_kota" name="kota" class="form-control high-contrast" required>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="edit_alamat" class="form-label small fw-bold">Alamat Lengkap</label>
+                            <textarea id="edit_alamat" name="alamat" class="form-control high-contrast" rows="2" required></textarea>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_no_hp" class="form-label small fw-bold">No HP / Telp</label>
+                            <input type="text" id="edit_no_hp" name="no_hp" class="form-control high-contrast">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_ketua" class="form-label small fw-bold">Nama Ketua</label>
+                            <input type="text" id="edit_ketua" name="ketua" class="form-control high-contrast">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_sekretaris" class="form-label small fw-bold">Nama Sekretaris</label>
+                            <input type="text" id="edit_sekretaris" name="sekretaris" class="form-control high-contrast">
+                        </div>
+                    </div>
+                    <div class="section-divider">
+                        <span class="section-title text-success fw-bold">Narasi Profil (Untuk Halaman Tentang)</span>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="edit_visi" class="form-label small fw-bold">Visi</label>
+                            <textarea id="edit_visi" name="visi" class="form-control high-contrast">{{ identitas.visi }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="edit_misi" class="form-label small fw-bold">Misi</label>
+                            <textarea id="edit_misi" name="misi" class="form-control high-contrast">{{ identitas.misi }}</textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="edit_sejarah" class="form-label small fw-bold">Sejarah / Deskripsi</label>
+                            <textarea id="edit_sejarah" name="sejarah" class="form-control high-contrast" rows="4">{{ identitas.sejarah }}</textarea>
+                        </div>
+                    </div>
+                    <div class="section-divider">
+                        <span class="section-title text-primary fw-bold">Pengaturan Label Sebutan</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="edit_label_anggota" class="form-label small fw-bold text-danger">Sebutan Anggota (Warga/Pelanggan/Siswa)</label>
+                            <input type="text" id="edit_label_anggota" name="label_anggota" class="form-control high-contrast border-danger">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="edit_label_iuran" class="form-label small fw-bold text-danger">Sebutan Iuran (Iuran/Tagihan/SPP)</label>
+                            <input type="text" id="edit_label_iuran" name="label_iuran" class="form-control high-contrast border-danger">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_label_tingkat1" class="form-label small fw-bold">Tingkat 1 (Zona/Wilayah)</label>
+                            <input type="text" id="edit_label_tingkat1" name="label_tingkat1" class="form-control high-contrast">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_label_tingkat2" class="form-label small fw-bold">Tingkat 2 (Blok/Sektor)</label>
+                            <input type="text" id="edit_label_tingkat2" name="label_tingkat2" class="form-control high-contrast">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="edit_label_tingkat3" class="form-label small fw-bold">Tingkat 3 (Cluster/Unit)</label>
+                            <input type="text" id="edit_label_tingkat3" name="label_tingkat3" class="form-control high-contrast">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4">
+                    <button type="submit" class="btn btn-primary px-5 shadow fw-bold">SIMPAN PERUBAHAN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script>
+$(document).ready(function() {
+    $('.btn-edit-identitas').on('click', function() {
+        const d = $(this).data();
+        
+        // Data Dasar
+        $("#edit_nama_app").val(d.nama);
+        $("#edit_alamat").val(d.alamat);
+        $("#edit_kota").val(d.kota);
+        $("#edit_no_hp").val(d.hp);
+        $("#edit_ketua").val(d.ketua);
+        $("#edit_sekretaris").val(d.sekretaris);
+        
+        // Data Labeling (Baru)
+        $("#edit_label_anggota").val(d.l_anggota);
+        $("#edit_label_iuran").val(d.l_iuran);
+        $("#edit_label_tingkat1").val(d.l_t1);
+        $("#edit_label_tingkat2").val(d.l_t2);
+        $("#edit_label_tingkat3").val(d.l_t3);
+        
+        $("#formEditIdentitas").attr("action", "/identitas/edit/" + d.id);
+        
+        const editModal = new bootstrap.Modal(document.getElementById('modalEditIdentitas'));
+        editModal.show();
+    });
+});
+</script>
+{% endblock %}

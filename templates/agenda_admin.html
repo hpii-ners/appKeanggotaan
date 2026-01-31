@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Jadwal Agenda & Kegiatan</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalTambahAgenda">
+                <i class="bi bi-calendar-plus me-1"></i> Tambah Agenda
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Waktu Kegiatan</th>
+                            <th>Nama Kegiatan</th>
+                            <th>Lokasi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in data %}
+                        <tr>
+                            <td>{{ item.tanggal_kegiatan.strftime('%d %b %Y - %H:%M') }}</td>
+                            <td class="fw-bold">{{ item.nama_kegiatan }}</td>
+                            <td><i class="bi bi-geo-alt me-1 text-danger"></i>{{ item.lokasi }}</td>
+                            <td>
+                                <a href="{{ url_for('agenda.hapus', id=item.id) }}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Hapus agenda ini?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="modalTambahAgenda" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{{ url_for('agenda.tambah') }}" method="POST" class="w-100">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Input Agenda Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="nama_kegiatan" class="form-label fw-bold">Nama Kegiatan</label>
+                        <input type="text" id="nama_kegiatan" name="nama_kegiatan" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tanggal" class="form-label fw-bold">Waktu & Tanggal</label>
+                        <input type="datetime-local" id="tanggal" name="tanggal" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="lokasi" class="form-label fw-bold">Lokasi</label>
+                        <input type="text" id="lokasi" name="lokasi" class="form-control" placeholder="Contoh: Balai Warga">
+                    </div>
+                    <div class="mb-3">
+                        <label for="keterangan" class="form-label fw-bold">Keterangan</label>
+                        <textarea id="keterangan" name="keterangan" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-primary w-100">Simpan Agenda</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

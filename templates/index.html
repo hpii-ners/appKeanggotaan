@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+
+<style>
+    .ui-autocomplete { z-index: 2147483647 !important; border-radius: 12px; }
+</style>
+
+<div class="row animate__animated animate__fadeIn">
+    <div class="col-md-12 mb-4 d-flex justify-content-between align-items-center">
+        <button type="button" class="btn btn-primary px-4 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#modalTambah">
+            <i class="bi bi-plus-circle me-2"></i>Tambah Pembayaran
+        </button>
+        <div class="text-end">
+            <h5 class="fw-bold text-primary mb-0">MONITORING IURAN</h5>
+            <small class="text-muted">Data tersinkronisasi</small>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 p-4 text-dark">
+            <div class="table-responsive">
+                <table id="iplTable" class="table table-hover w-100 align-middle">
+                    <thead class="text-secondary">
+                        <tr>
+                            <th>TANGGAL</th>
+                            <th>NAMA {{ identitas.label_anggota|upper }}</th>
+                            <th>{{ identitas.label_tingkat1|upper }}/{{ identitas.label_tingkat2|upper }}</th>
+                            <th>BULAN</th>
+                            <th>JUMLAH</th>
+                            <th>STATUS</th>
+                            <th class="text-center">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in sudah_bayar %}
+                        <tr>
+                            <td class="small">{{ d.tanggal.strftime('%d/%m/%Y') }}</td>
+                            <td class="fw-bold">{{ d.nama_warga }}</td>
+                            <td><span class="badge bg-light text-dark border">{{ d.blok_rumah }}</span> {{ d.zona }}</td>
+                            <td><span class="text-primary fw-medium">{{ d.bulan_iuran }}</span></td>
+                            <td class="fw-bold text-success">Rp {{ "{:,.0f}".format(d.jumlah).replace(',', '.') }}</td>
+                            <td><span class="badge bg-success">Lunas</span></td>
+                            <td class="text-center">
+                                <button class="btn btn-sm btn-outline-primary border-0 btn-edit-iuran" 
+                                    data-id="{{ d.id }}" 
+                                    data-nama="{{ d.nama_warga }}" 
+                                    data-blok="{{ d.blok_rumah }}" 
+                                    data-hp="{{ d.no_hp }}" 
+                                    data-zona="{{ d.zona }}" 
+                                    data-bulan="{{ d.bulan_iuran }}" 
+                                    data-jumlah="{{ d.jumlah }}" 
+                                    data-ket="{{ d.keterangan }}">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <a href="/cetak_kuitansi/{{ d.id }}" target="_blank" class="btn btn-sm btn-outline-dark border-0" title="Cetak Kuitansi">
+                                    <i class="bi bi-printer-fill"></i>
+                                </a>
+                                <a href="/hapus_iuran/{{ d.id }}" class="btn btn-sm btn-outline-danger border-0" onclick="return confirm('Hapus data ini?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="modalTambah" tabindex="-1" data-bs-focus="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <form action="/bayar" method="POST">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold">Input Pembayaran</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-dark">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="nama_input">Cari Nama {{ identitas.label_anggota }}</label>
+                        <input type="text" id="nama_input" name="nama" class="form-control" placeholder="Ketik nama..." required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="blok_input">{{ identitas.label_tingkat1 }}</label>
+                            <input type="text" id="blok_input" name="blok" class="form-control bg-light" readonly required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="zona_input">{{ identitas.label_tingkat2 }}</label>
+                            <input type="text" id="zona_input" name="zona" class="form-control bg-light" readonly required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="hp_input">No. HP</label>
+                        <input type="text" id="hp_input" name="no_hp" class="form-control bg-light" readonly required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" for="bulan_tambah">Bulan</label>
+                            <select id="bulan_tambah" name="bulan" class="form-select" required>
+                                {% for m in ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] %}
+                                <option value="{{ m }}">{{ m }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" for="jumlah_tambah">Jumlah (Rp)</label>
+                            <input type="number" id="jumlah_tambah" name="jumlah" class="form-control" value="150000" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="ket_tambah">Keterangan</label>
+                        <textarea id="ket_tambah" name="keterangan" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Simpan Pembayaran</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEdit" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <form id="formEditIuran" method="POST">
+                <div class="modal-header bg-warning text-dark border-0">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Pembayaran</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-dark">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="edit_nama">Nama {{ identitas.label_anggota }}</label>
+                        <input type="text" id="edit_nama" name="nama" class="form-control bg-light" readonly>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="edit_blok">{{ identitas.label_tingkat1 }}</label>
+                            <input type="text" id="edit_blok" name="blok" class="form-control bg-light" readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" for="edit_zona">{{ identitas.label_tingkat2 }}</label>
+                            <input type="text" id="edit_zona" name="zona" class="form-control bg-light" readonly>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="edit_hp">No. HP</label>
+                        <input type="text" id="edit_hp" name="no_hp" class="form-control bg-light" readonly>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" for="edit_bulan">Bulan</label>
+                            <select id="edit_bulan" name="bulan" class="form-select" required>
+                                {% for m in ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] %}
+                                <option value="{{ m }}">{{ m }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold" for="edit_jumlah">Jumlah (Rp)</label>
+                            <input type="number" id="edit_jumlah" name="jumlah" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="edit_ket">Keterangan</label>
+                        <textarea id="edit_ket" name="keterangan" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="submit" class="btn btn-warning w-100 py-2 fw-bold">Update Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script>
+$(document).ready(function() {
+    // 1. Inisialisasi DataTable
+    var table = $('#iplTable').DataTable();
+
+    // 2. Logic Autocomplete untuk Tambah Data
+    $("#nama_input").autocomplete({
+        source: "/api/search_warga",
+        minLength: 1,
+        focus: function(event, ui) { return false; },
+        select: function(event, ui) {
+            $("#nama_input").val(ui.item.value);
+            $("#hp_input").val(ui.item.no_hp);
+            $("#blok_input").val(ui.item.blok);
+            $("#zona_input").val(ui.item.zona);
+            return false;
+        }
+    }).autocomplete("instance")._renderItem = function(ul, item) {
+        return $("<li>")
+            .append("<div class='py-1 px-2 border-bottom'><span class='fw-bold text-primary'>" + item.value + "</span><br><small class='text-muted'>" + item.blok + " | " + item.zona + "</small></div>")
+            .appendTo(ul);
+    };
+
+    // 3. LOGIC TOMBOL EDIT
+    $('#iplTable').on('click', '.btn-edit-iuran', function() {
+        const id = $(this).data('id');
+        const nama = $(this).data('nama');
+        const blok = $(this).data('blok');
+        const hp = $(this).data('hp');
+        const zona = $(this).data('zona');
+        const bulan = $(this).data('bulan');
+        const jumlah = $(this).data('jumlah');
+        const ket = $(this).data('ket');
+
+        $('#edit_nama').val(nama);
+        $('#edit_blok').val(blok);
+        $('#edit_hp').val(hp);
+        $('#edit_zona').val(zona);
+        $('#edit_bulan').val(bulan);
+        $('#edit_jumlah').val(jumlah);
+        $('#edit_ket').val(ket);
+
+        $('#formEditIuran').attr('action', '/edit_iuran/' + id);
+
+        const editModal = new bootstrap.Modal(document.getElementById('modalEdit'));
+        editModal.show();
+    });
+});
+</script>
+{% endblock %}

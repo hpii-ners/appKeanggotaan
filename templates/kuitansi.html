@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kuitansi_{{ data.nama_warga }}_{{ data.bulan_iuran }}</title>
+    <style>
+        /* RESET & BASE STYLES */
+        * { 
+            box-sizing: border-box; 
+            -webkit-print-color-adjust: exact; /* Untuk Chrome/Safari */
+            print-color-adjust: exact;         /* Standar Modern (Firefox/Edge) */
+        }
+        
+        body {
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            color: #000;
+            font-size: 12px; /* Ukuran font pas untuk A5 */
+            margin: 0;
+            padding: 20px;
+            background: #eee;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* TAMPILAN DI LAYAR (PREVIEW) */
+        .container {
+            width: 210mm;  /* Lebar A5 Landscape */
+            height: 148mm; /* Tinggi A5 Landscape */
+            background: #fff;
+            padding: 10mm 15mm; /* Margin dalam (Atas/Bawah 10mm, Kiri/Kanan 15mm) */
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Agar footer selalu di bawah */
+        }
+
+        /* HEADER */
+        .header {
+            text-align: center;
+            border-bottom: 2px double #000;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+        .header h2 { margin: 0; text-transform: uppercase; font-size: 16px; font-weight: 800; }
+        .header p { margin: 2px 0 0; font-size: 10px; }
+        
+        .title {
+            text-align: center;
+            text-decoration: underline;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        /* ISI KONTEN (CSS GRID) */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 140px 15px 1fr; /* Kolom Label diperkecil sedikit utk A5 */
+            row-gap: 8px; /* Jarak antar baris lebih rapat */
+            align-items: start;
+        }
+        
+        .grid-label { font-weight: bold; font-size: 11px; }
+        .grid-colon { text-align: center; }
+        .grid-value { word-wrap: break-word; line-height: 1.2; }
+        
+        .value-underline { 
+            border-bottom: 1px dotted #999; 
+            padding-bottom: 1px;
+            display: block;
+            width: 100%;
+        }
+        
+        .terbilang-box {
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            font-style: italic;
+            font-weight: bold;
+            border: 1px solid #000;
+            font-size: 11px;
+            display: inline-block;
+        }
+
+        /* FOOTER & TTD */
+        .footer { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-top: 10px;
+        }
+        .ttd-box { text-align: center; width: 180px; }
+        .ttd-space { height: 50px; } /* Ruang tanda tangan */
+
+        /* TOMBOL PRINT (DI LAYAR) */
+        .no-print {
+            position: fixed; top: 20px; right: 20px;
+            background: #fff; padding: 10px; 
+            border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 9999;
+        }
+        .btn-print {
+            display: block; background: #0d6efd; color: white; border: none; 
+            padding: 8px 15px; cursor: pointer; font-weight: bold; 
+            border-radius: 4px; text-decoration: none; font-size: 12px; text-align: center;
+        }
+        .btn-back {
+            display: block; margin-top: 5px; color: #555; text-decoration: none; 
+            font-size: 11px; text-align: center;
+        }
+
+        /* --- SETTING KHUSUS CETAK (A5 LANDSCAPE) --- */
+        @media print {
+            @page {
+                size: A5 landscape; /* KUNCI UTAMA: Memaksa ukuran A5 Landscape */
+                margin: 0;          /* Hilangkan margin printer default */
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                background: none;
+                width: 210mm;
+                height: 148mm;
+            }
+            .container {
+                width: 100%;
+                height: 100%;
+                box-shadow: none;
+                border: none;
+                margin: 0;
+                padding: 10mm 15mm; 
+                page-break-after: always;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body onload="setTimeout(function(){window.print()}, 500)">
+
+    <div class="no-print">
+        <a href="javascript:window.print()" class="btn-print">🖨️ Cetak Kuitansi</a>
+        <a href="/" class="btn-back">Kembali ke Menu</a>
+    </div>
+
+    <div class="container">
+        
+        <div>
+            <div class="header">
+                <h2>{{ identitas.nama_app if identitas else 'Aplikasi Iuran Warga' }}</h2>
+                <p>{{ identitas.alamat if identitas else 'Alamat tidak tersedia' }} | {{ identitas.kota if identitas else '' }}</p>
+            </div>
+
+            <div class="title">KUITANSI PEMBAYARAN</div>
+
+            <div class="info-grid">
+                <div class="grid-label">No. Transaksi</div>
+                <div class="grid-colon">:</div>
+                <div class="grid-value">#{{ "%04d" | format(data.id) }} / {{ data.tanggal.strftime('%m/%Y') }}</div>
+
+                <div class="grid-label">Telah Terima Dari</div>
+                <div class="grid-colon">:</div>
+                <div class="grid-value value-underline">
+                    <b>{{ data.nama_warga }}</b> ({{ data.blok_rumah }} - {{ data.zona }})
+                </div>
+
+                <div class="grid-label">Uang Sejumlah</div>
+                <div class="grid-colon">:</div>
+                <div class="grid-value" style="font-weight: bold; font-size: 14px;">
+                    Rp {{ "{:,.0f}".format(data.jumlah).replace(',', '.') }}
+                </div>
+
+                <div class="grid-label">Untuk Pembayaran</div>
+                <div class="grid-colon">:</div>
+                <div class="grid-value value-underline">
+                    Iuran Bulan <b>{{ data.bulan_iuran }}</b> (Tahun {{ data.tanggal.year }})
+                </div>
+
+                <div class="grid-label">Terbilang</div>
+                <div class="grid-colon">:</div>
+                <div class="grid-value">
+                    <div class="terbilang-box">## {{ terbilang }} Rupiah ##</div>
+                </div>
+
+                {% if data.keterangan %}
+                <div class="grid-label">Keterangan</div>
+                <div class="grid-colon">:</div>
+                <div class="grid-value value-underline">{{ data.keterangan }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="ttd-box">
+                </div>
+            <div class="ttd-box">
+                <p style="margin-bottom: 5px;">{{ identitas.kota if identitas else 'Jakarta' }}, {{ data.tanggal.strftime('%d %B %Y') }}</p>
+                <p style="margin: 0;">Penerima,</p>
+                <div class="ttd-space"></div>
+                <p style="margin: 0;"><b>( {{ current_user.username if current_user.is_authenticated else 'Bendahara' }} )</b></p>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

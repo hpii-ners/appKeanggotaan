@@ -1,0 +1,49 @@
+{% extends "base_public.html" %}
+
+{% block content %}
+<div class="animate__animated animate__fadeIn">
+    <nav aria-label="breadcrumb" class="mb-4 small">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/berita" class="text-decoration-none text-muted">Berita</a></li>
+            <li class="breadcrumb-item active text-primary fw-bold">{{ item.judul }}</li>
+        </ol>
+    </nav>
+
+    <div class="bg-white rounded-4 shadow-sm p-4 p-lg-5 mb-5">
+        <h1 class="fw-800 mb-3" style="letter-spacing: -1px; font-size: 2.5rem; line-height: 1.2;">{{ item.judul }}</h1>
+        
+        <div class="d-flex align-items-center mb-4 pb-4 border-bottom text-muted small">
+            <div class="d-flex align-items-center me-4">
+                <i class="bi bi-person-circle fs-5 me-2 text-primary"></i>
+                <span class="fw-bold text-dark">{{ item.penulis or 'Admin' }}</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <i class="bi bi-calendar3 me-2"></i>
+                <span>{{ item.tanggal.strftime('%d %B %Y') }}</span>
+            </div>
+        </div>
+
+        {% if item.path_image %}
+        <div class="mb-5 text-center">
+            <img src="{{ url_for('static', filename='uploads/' + item.path_image) }}" 
+                 class="img-fluid rounded-4 shadow-sm" 
+                 alt="{{ item.judul }}" 
+                 style="max-height: 500px; object-fit: cover;">
+        </div>
+        {% endif %}
+
+        <div class="news-content fs-5" style="line-height: 1.8; color: #334155; text-align: justify;">
+            {{ item.isi | safe }}
+        </div>
+
+        <div class="mt-5 pt-4 border-top">
+            <p class="small fw-bold text-muted text-uppercase mb-3">Bagikan:</p>
+            <a href="https://wa.me/?text={{ item.judul|urlencode }}%0A{{ request.url|urlencode }}" 
+               target="_blank" 
+               class="btn btn-success rounded-pill px-4 fw-bold shadow-sm">
+                <i class="bi bi-whatsapp me-2"></i> WhatsApp
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

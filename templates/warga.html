@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    
+    <div class="d-flex justify-content-between align-items-center mb-5 no-print">
+        <div>
+            <h2 class="fw-800 mb-1" style="letter-spacing: -1px;">Database {{ identitas.label_anggota }}</h2>
+            <p class="text-muted">Manajemen identitas {{ identitas.label_anggota }} dan pemetaan wilayah</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-dark px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalUploadMasal">
+                <i class="bi bi-file-earmark-arrow-up me-2"></i>Upload Masal
+            </button>
+            <button type="button" class="btn btn-primary px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambah{{ identitas.label_anggota }}">
+                <i class="bi bi-person-plus me-2"></i>Tambah {{ identitas.label_anggota }}
+            </button>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-lg p-5" style="border-radius: 24px;">
+        <div class="table-responsive">
+            <table class="table custom-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;" class="text-center">#</th>
+                        <th>NAMA LENGKAP</th>
+                        <th>ALAMAT</th>
+                        <th>{{ identitas.label_tingkat1 }}</th>
+                        <th>{{ identitas.label_tingkat2 }}</th>
+                        <th>NO. HANDPHONE</th>
+                        <th class="text-end">AKSI</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in data %}
+                    <tr>
+                        <td class="text-center text-muted small">{{ loop.index }}</td>
+                        <td><span class="fw-600 text-dark">{{ w.nama }}</span></td>
+                        <td><small class="text-muted">{{ w.alamat if w.alamat else '-' }}</small></td>
+                        <td>
+                            <span class="badge bg-light text-dark fw-bold px-3 py-2 border" style="font-size: 11px;">
+                                {{ w.blok if w.blok else '-' }}
+                            </span>
+                        </td>
+                        <td><small class="text-muted">{{ w.zona if w.zona else '-' }}</small></td>
+                        <td><small class="fw-bold">{{ w.no_hp if w.no_hp else '-' }}</small></td>
+                        <td class="text-end">
+                            <button type="button" class="btn btn-sm btn-outline-dark border-0 me-1 btn-edit-{{ identitas.label_anggota }}" 
+                                    data-id="{{ w.id }}" 
+                                    data-nama="{{ w.nama }}" 
+                                    data-alamat="{{ w.alamat }}"
+                                    data-blok="{{ w.blok }}" 
+                                    data-hp="{{ w.no_hp }}" 
+                                    data-zona="{{ w.zona }}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <a href="/{{ identitas.label_anggota|lower }}/hapus/{{ w.id }}" class="btn btn-sm btn-outline-danger border-0" 
+                               onclick="return confirm('Hapus data {{ identitas.label_anggota }} {{ w.nama }}? Tindakan ini tidak dapat dibatalkan.')">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <i class="bi bi-people fs-2 d-block mb-2 opacity-25"></i>
+                            Belum ada data {{ identitas.label_anggota }} terdaftar. Silakan tambah manual atau upload masal.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-800 { font-weight: 800; }
+    .fw-600 { font-weight: 600; }
+    
+    .custom-table thead th {
+        background-color: transparent;
+        border-bottom: 2px solid #0f172a;
+        color: #0f172a;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 15px 10px;
+    }
+
+    .custom-table tbody td {
+        padding: 18px 10px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+    }
+
+    .form-control-premium {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+        padding: 12px 15px !important;
+        font-weight: 600 !important;
+        color: #0f172a !important;
+        transition: all 0.2s;
+    }
+
+    .form-control-premium:focus {
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1) !important;
+        background: #fff !important;
+    }
+</style>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="modalTambah{{ identitas.label_anggota }}" tabindex="-1" aria-labelledby="titleTambah" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold" id="titleTambah">Registrasi {{ identitas.label_anggota }} Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/{{ identitas.label_anggota|lower }}/tambah" method="POST">
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tambah_nama" class="form-label small fw-bold">Nama Lengkap</label>
+                            <input type="text" id="tambah_nama" name="nama" class="form-control form-control-premium" required placeholder="Contoh: Budi Santoso">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="tambah_no_hp" class="form-label small fw-bold">Nomor Handphone</label>
+                            <input type="text" id="tambah_no_hp" name="no_hp" class="form-control form-control-premium" placeholder="0812xxxx">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="tambah_alamat" class="form-label small fw-bold">Alamat Domisili</label>
+                            <textarea id="tambah_alamat" name="alamat" class="form-control form-control-premium" rows="2" placeholder="Tulis alamat lengkap..."></textarea>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="tambah_blok" class="form-label small fw-bold">{{ identitas.label_tingkat1 }}</label>
+                            <input type="text" id="tambah_blok" name="blok" class="form-control form-control-premium" placeholder="A1/12">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="tambah_zona" class="form-label small fw-bold">{{ identitas.label_tingkat2 }}</label>
+                            <input type="text" id="tambah_zona" name="zona" class="form-control form-control-premium" placeholder="RT 01">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4">
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-4 shadow-sm">SIMPAN DATA</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEdit{{ identitas.label_anggota }}" tabindex="-1" aria-labelledby="titleEdit" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold" id="titleEdit">Perbarui Identitas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formEdit{{ identitas.label_anggota }}" method="POST">
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_nama" class="form-label small fw-bold">Nama Lengkap</label>
+                            <input type="text" id="edit_nama" name="nama" class="form-control form-control-premium" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_no_hp" class="form-label small fw-bold">Nomor Handphone</label>
+                            <input type="text" id="edit_no_hp" name="no_hp" class="form-control form-control-premium">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="edit_alamat" class="form-label small fw-bold">Alamat Domisili</label>
+                            <textarea id="edit_alamat" name="alamat" class="form-control form-control-premium" rows="2"></textarea>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="edit_blok" class="form-label small fw-bold">{{ identitas.label_tingkat1 }}</label>
+                            <input type="text" id="edit_blok" name="blok" class="form-control form-control-premium">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="edit_zona" class="form-label small fw-bold">{{ identitas.label_tingkat2 }}</label>
+                            <input type="text" id="edit_zona" name="zona" class="form-control form-control-premium">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4">
+                    <button type="submit" class="btn btn-dark w-100 py-3 fw-bold rounded-4 shadow-sm">UPDATE PERUBAHAN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalUploadMasal" tabindex="-1" aria-labelledby="titleUpload" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-bold" id="titleUpload">Import Data {{ identitas.label_anggota }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/{{ identitas.label_anggota|lower }}/upload_masal" method="POST" enctype="multipart/form-data">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-file-earmark-spreadsheet text-primary" style="font-size: 3rem;"></i>
+                        <p class="mt-2 text-muted">Unggah file <strong>Excel (.xlsx)</strong> atau <strong>CSV</strong></p>
+                    </div>
+                    <div class="alert alert-light border border-dashed text-start mb-4" style="border-style: dashed !important;">
+                        <small class="d-block fw-bold text-uppercase mb-2" style="font-size: 10px;">Format Header Kolom:</small>
+                        <code class="text-primary fw-bold">nama, alamat, blok, no_hp, zona</code>
+                    </div>
+                    <div class="mb-0 text-start">
+                        <label for="file_masal" class="form-label small fw-bold">Pilih File</label>
+                        <input type="file" id="file_masal" name="file_masal" class="form-control form-control-premium" accept=".csv, .xlsx, .xls" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4">
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-4 shadow-sm">MULAI IMPORT</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script>
+$(document).ready(function() {
+    // Fungsi untuk memicu modal Edit dan mengisi datanya
+    $('.btn-edit-{{ identitas.label_anggota }}').on('click', function() {
+        const d = $(this).data();
+        
+        // Isi field di modal edit (Termasuk Alamat)
+        $('#edit_nama').val(d.nama);
+        $('#edit_alamat').val(d.alamat);
+        $('#edit_blok').val(d.blok);
+        $('#edit_no_hp').val(d.hp);
+        $('#edit_zona').val(d.zona);
+        
+        // Set action form secara dinamis berdasarkan ID (Gunakan huruf kecil untuk route)
+        const labelLower = "{{ identitas.label_anggota|lower }}";
+        $('#formEdit{{ identitas.label_anggota }}').attr('action', '/' + labelLower + '/edit/' + d.id);
+        
+        // Tampilkan modal edit
+        const editModal = new bootstrap.Modal(document.getElementById('modalEdit{{ identitas.label_anggota }}'));
+        editModal.show();
+    });
+});
+</script>
+{% endblock %}

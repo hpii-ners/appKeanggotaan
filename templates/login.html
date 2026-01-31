@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | {{ identitas.nama_app if identitas else 'Aurora Ledger' }}</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <style>
+        :root {
+            /* Warna tema Aurora (Biru ke Ungu) */
+            --aurora-primary: #0284c7;
+            --aurora-secondary: #7c3aed;
+            --aurora-gradient: linear-gradient(135deg, var(--aurora-primary), var(--aurora-secondary));
+            --bg-gradient: linear-gradient(to right bottom, #f0f9ff, #e0e7ff, #ede9fe);
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif;
+            /* Latar belakang gradient halus agar tidak pucat */
+            background-image: var(--bg-gradient);
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            color: #1e293b;
+        }
+
+        .login-card { 
+            border: none; 
+            border-radius: 24px; 
+            /* Bayangan yang lebih dalam dan lembut (modern look) */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            background: rgba(255, 255, 255, 0.95); /* Sedikit transparan */
+            backdrop-filter: blur(10px); /* Efek kaca buram */
+            padding: 2.5rem !important;
+        }
+
+        /* Perbaikan untuk standar kompatibilitas background-clip */
+        .brand-gradient {
+            background: var(--aurora-gradient);
+            -webkit-background-clip: text; /* Untuk browser berbasis WebKit (Chrome, Safari, Edge) */
+            background-clip: text;         /* Properti standar resmi */
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            border-radius: 12px;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            background-color: #f8fafc;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .form-control:focus {
+            border-color: var(--aurora-primary);
+            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1);
+            background-color: #fff;
+        }
+
+        .input-group-text {
+            border-radius: 0 12px 12px 0;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-left: none;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
+        .password-input {
+            border-right: none;
+        }
+
+        .btn-gradient { 
+            /* Tombol gradient agar lebih hidup */
+            background: var(--aurora-gradient);
+            border: none;
+            border-radius: 12px; 
+            padding: 14px; 
+            font-weight: 700; 
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .btn-gradient:hover {
+            filter: brightness(110%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(2, 132, 199, 0.5);
+            color: white;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--aurora-primary);
+            border-color: var(--aurora-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4"> <div class="card login-card animate__animated animate__fadeInUp">
+                    <div class="text-center mb-5 animate__animated animate__fadeIn animate__delay-1s">
+                        <div class="mb-3">
+                             <span class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle" style="background: rgba(2, 132, 199, 0.1);">
+                                <i class="bi bi-shield-lock-fill fs-3" style="color: var(--aurora-primary);"></i>
+                            </span>
+                        </div>
+                        <h3 class="brand-gradient mb-2">
+                            {{ identitas.nama_app if identitas else 'Aurora Ledger' }}
+                        </h3>
+                        <p class="text-muted fw-medium">Selamat datang kembali, admin.</p>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }} py-2 small text-center border-0 rounded-3 mb-4 fw-bold animate__animated animate__shakeX">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label class="form-label" for="username">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-end-0 bg-white text-muted" style="border-radius: 12px 0 0 12px; padding-left: 15px;">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text" id="username" name="username" class="form-control border-start-0 ps-0 bg-white" placeholder="Masukkan username" required autofocus>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label" for="password">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text border-end-0 bg-white text-muted" style="border-radius: 12px 0 0 12px; padding-left: 15px;">
+                                    <i class="bi bi-key"></i>
+                                </span>
+                                <input type="password" id="password" name="password" class="form-control password-input border-start-0 ps-0 bg-white" placeholder="••••••••" required>
+                                <span class="input-group-text bg-white" id="togglePassword" style="border-left: none;">
+                                    <i class="bi bi-eye-slash text-muted" id="eyeIcon"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember" id="rememberMe">
+                                <label class="form-check-label fw-medium text-secondary small pt-1" for="rememberMe">
+                                    Ingatkan saya di perangkat ini
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-gradient shadow-sm">
+                                Masuk ke Dashboard
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-5">
+                         <a href="/berita" class="text-decoration-none fw-bold small" style="color: var(--aurora-primary);">
+                            <i class="bi bi-arrow-left me-1"></i> Kembali ke Beranda
+                        </a>
+                    </div>
+                </div>
+                 <div class="text-center mt-4 text-muted small fw-medium">
+                    &copy; {{ now.year if now else '2026' }} {{ identitas.nama_app if identitas else 'Aurora Ledger' }}.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const togglePassword = document.querySelector('#togglePassword');
+        const password = document.querySelector('#password');
+        const eyeIcon = document.querySelector('#eyeIcon');
+
+        togglePassword.addEventListener('click', function (e) {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            // Ganti ikon mata
+            eyeIcon.classList.toggle('bi-eye');
+            eyeIcon.classList.toggle('bi-eye-slash');
+            
+            // Ubah warna ikon saat aktif agar lebih jelas
+            if (type === 'text') {
+                eyeIcon.classList.remove('text-muted');
+                eyeIcon.classList.add('text-primary');
+            } else {
+                eyeIcon.classList.add('text-muted');
+                eyeIcon.classList.remove('text-primary');
+            }
+        });
+    </script>
+</body>
+</html>

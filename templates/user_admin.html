@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-800 mb-0">Manajemen Akses</h2>
+            <p class="text-muted small">Kelola akun administrator sistem</p>
+        </div>
+        <button class="btn btn-primary px-4 fw-bold rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#modalTambahUser">
+            <i class="bi bi-person-plus-fill me-2"></i>Tambah User
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-uppercase small fw-800 opacity-50">Username</th>
+                        <th class="py-3 text-uppercase small fw-800 opacity-50">Status</th>
+                        <th class="pe-4 py-3 text-end text-uppercase small fw-800 opacity-50">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                                <span class="fw-bold text-dark">{{ u.username }}</span>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3">Aktif</span></td>
+                        <td class="pe-4 text-end">
+                            <button class="btn btn-sm btn-outline-dark border-0 btn-edit-user" 
+                                    data-id="{{ u.id }}" 
+                                    data-username="{{ u.username }}">
+                                <i class="bi bi-pencil-square"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade" id="modalTambahUser" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="{{ url_for('admin.user_tambah') }}" method="POST" class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-800 mb-0">Buat Akses Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold" for="username">Username</label>
+                    <input type="text" name="username" class="form-control" required placeholder="admin_baru">
+                </div>
+                <div class="mb-0">
+                    <label class="form-label small fw-bold" for="password">Password</label>
+                    <div class="input-group">
+                        <input type="password" id="password_tambah" name="password" class="form-control border-end-0" required placeholder="••••••••">
+                        <span class="input-group-text bg-white border-start-0 toggle-password" data-target="#password_tambah" style="cursor: pointer;">
+                            <i class="bi bi-eye-slash text-muted"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-3">Simpan User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEditUser" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="formEditUser" method="POST" class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 p-4 pb-0">
+                <h5 class="fw-800 mb-0">Perbarui Akses</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold" for="username">Username</label>
+                    <input type="text" id="edit_username" name="username" class="form-control" required>
+                </div>
+                <div class="mb-0">
+                    <label class="form-label small fw-bold" for="password">Password Baru (Kosongkan jika tidak diubah)</label>
+                    <div class="input-group">
+                        <input type="password" id="edit_password" name="password" class="form-control border-end-0" placeholder="••••••••">
+                        <span class="input-group-text bg-white border-start-0 toggle-password" data-target="#edit_password" style="cursor: pointer;">
+                            <i class="bi bi-eye-slash text-muted"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0">
+                <button type="submit" class="btn btn-dark w-100 py-3 fw-bold rounded-3">Update Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+$(document).ready(function() {
+    // 1. Logic Hide/Show Password
+    $('.toggle-password').on('click', function() {
+        const targetSelector = $(this).data('target');
+        const passwordInput = $(targetSelector);
+        const icon = $(this).find('i');
+
+        if (passwordInput.attr('type') === 'password') {
+            passwordInput.attr('type', 'text');
+            icon.removeClass('bi-eye-slash text-muted').addClass('bi-eye text-primary');
+        } else {
+            passwordInput.attr('type', 'password');
+            icon.removeClass('bi-eye text-primary').addClass('bi-eye-slash text-muted');
+        }
+    });
+
+    // 2. Mapping Data ke Modal Edit
+    $('.btn-edit-user').on('click', function() {
+        const d = $(this).data();
+        $('#edit_username').val(d.username);
+        $('#formEditUser').attr('action', '/admin/users/edit/' + d.id);
+        
+        const editModal = new bootstrap.Modal(document.getElementById('modalEditUser'));
+        editModal.show();
+    });
+});
+</script>
+{% endblock %}
